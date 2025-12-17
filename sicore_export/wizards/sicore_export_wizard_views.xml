@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Vista Form del Wizard -->
+    <record id="view_sicore_export_wizard_form" model="ir.ui.view">
+        <field name="name">sicore.export.wizard.form</field>
+        <field name="model">sicore.export.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Exportación SICORE">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="export_type" widget="radio" options="{'horizontal': true}"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Empresa">
+                            <field name="company_id" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Filtros de Exportación">
+                        <group>
+                            <label for="date_from" string="Rango de Fechas"/>
+                            <div class="o_row">
+                                <field name="date_from" required="1"/>
+                                <span class="mx-2">a</span>
+                                <field name="date_to" required="1"/>
+                            </div>
+                            <field name="journal_ids" widget="many2many_tags" placeholder="Todos los diarios (excepto presupuestos)"/>
+                        </group>
+                        <group>
+                            <field name="partner_regime"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Vista Previa" name="preview">
+                            <group>
+                                <field name="records_count" readonly="1" invisible="1"/>
+                                <field name="total_retention_amount_preview" readonly="1" invisible="1"/>
+                                <field name="total_transaction_amount_preview" readonly="1" invisible="1"/>
+                                <field name="currency_id" invisible="1"/>
+                            </group>
+                            <div class="alert alert-info" role="alert" invisible="records_count == 0">
+                                <i class="fa fa-info-circle" title="Información"/> 
+                                <p><strong>Se exportarán <field name="records_count" readonly="1" nolabel="1"/> registros</strong></p>
+                                <p style="margin-bottom: 5px;">
+                                    <i class="fa fa-money" title="Monto Retenido"/> Monto Total Retenido/Percibido: 
+                                    <strong><field name="total_retention_amount_preview" readonly="1" nolabel="1" widget="monetary"/></strong>
+                                </p>
+                                <p style="margin-bottom: 0;">
+                                    <i class="fa fa-file-text-o" title="Monto de Transacciones"/> Monto Total de Transacciones: 
+                                    <strong><field name="total_transaction_amount_preview" readonly="1" nolabel="1" widget="monetary"/></strong>
+                                </p>
+                            </div>
+                            <div class="alert alert-warning" role="alert" invisible="records_count != 0">
+                                <i class="fa fa-exclamation-triangle" title="Advertencia"/> 
+                                No se encontraron registros con los filtros aplicados
+                            </div>
+                            <separator string="Resumen" invisible="records_count == 0"/>
+                            <field name="preview_data" widget="text" readonly="1" nolabel="1" 
+                                   invisible="records_count == 0"/>
+                        </page>
+                        
+                        <page string="Formato SICORE" name="format_info" invisible="export_type == 'fuel'">
+                            <div class="alert alert-primary" role="alert">
+                                <h4>Formato de Archivo SICORE</h4>
+                            </div>
+                            
+                            <div invisible="export_type != 'retention'">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Campo</th>
+                                                    <th>Tipo</th>
+                                                    <th>Desde</th>
+                                                    <th>Hasta</th>
+                                                    <th>Largo</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr><td>Código de comprobante</td><td>Entero</td><td>1</td><td>2</td><td>2</td></tr>
+                                                <tr><td>Fecha de emisión del comprobante</td><td>Fecha</td><td>3</td><td>12</td><td>10</td></tr>
+                                                <tr><td>Número del comprobante</td><td>Texto</td><td>13</td><td>28</td><td>16</td></tr>
+                                                <tr><td>Importe del comprobante</td><td>Decimal</td><td>29</td><td>44</td><td>16</td></tr>
+                                                <tr><td>Código de impuesto</td><td>Entero</td><td>45</td><td>48</td><td>4</td></tr>
+                                                <tr><td>Código de regimen</td><td>Entero</td><td>49</td><td>51</td><td>3</td></tr>
+                                                <tr><td>Código de operación</td><td>Entero</td><td>52</td><td>52</td><td>1</td></tr>
+                                                <tr><td>Base de cálculo</td><td>Decimal</td><td>53</td><td>66</td><td>14</td></tr>
+                                                <tr><td>Fecha de emisión de la retención</td><td>Fecha</td><td>67</td><td>76</td><td>10</td></tr>
+                                                <tr><td>Código de condición</td><td>Entero</td><td>77</td><td>78</td><td>2</td></tr>
+                                                <tr><td>Retención practicada a sujetos suspendidos según:</td><td>Entero</td><td>79</td><td>79</td><td>1</td></tr>
+                                                <tr><td>Importe de la retención</td><td>Decimal</td><td>80</td><td>93</td><td>14</td></tr>
+                                                <tr><td>Porcentaje de exclusión</td><td>Decimal</td><td>94</td><td>99</td><td>6</td></tr>
+                                                <tr><td>Fecha de publicación o de finalización de la vigencia</td><td>Fecha</td><td>100</td><td>109</td><td>10</td></tr>
+                                                <tr><td>Tipo de documento del retenido</td><td>Entero</td><td>110</td><td>111</td><td>2</td></tr>
+                                                <tr><td>Número de documento del retenido</td><td>Texto</td><td>112</td><td>131</td><td>20</td></tr>
+                                                <tr><td>Número certificado original</td><td>Texto</td><td>132</td><td>145</td><td>14</td></tr>
+                                                <tr><td>Denominación del ordenante</td><td>Texto</td><td>146</td><td>175</td><td>30</td></tr>
+                                                <tr><td>Cuit del país del retenido</td><td>Texto</td><td>176</td><td>186</td><td>11</td></tr>
+                                                <tr><td>Cuit del ordenante</td><td>Texto</td><td>187</td><td>197</td><td>11</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                            </div>
+                            
+                            <div invisible="export_type != 'perception'">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Campo</th>
+                                                    <th>Tipo</th>
+                                                    <th>Desde</th>
+                                                    <th>Hasta</th>
+                                                    <th>Largo</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr><td>Código de comprobante</td><td>Entero</td><td>1</td><td>2</td><td>2</td></tr>
+                                                <tr><td>Fecha de emisión del comprobante</td><td>Fecha</td><td>3</td><td>12</td><td>10</td></tr>
+                                                <tr><td>Número del comprobante</td><td>Texto</td><td>13</td><td>28</td><td>16</td></tr>
+                                                <tr><td>Importe del comprobante</td><td>Decimal</td><td>29</td><td>44</td><td>16</td></tr>
+                                                <tr><td>Código de impuesto</td><td>Entero</td><td>45</td><td>48</td><td>4</td></tr>
+                                                <tr><td>Código de régimen</td><td>Entero</td><td>49</td><td>51</td><td>3</td></tr>
+                                                <tr><td>Código de operación</td><td>Entero</td><td>52</td><td>52</td><td>1</td></tr>
+                                                <tr><td>Base de cálculo</td><td>Decimal</td><td>53</td><td>66</td><td>14</td></tr>
+                                                <tr><td>Fecha de emisión de la retención</td><td>Fecha</td><td>67</td><td>76</td><td>10</td></tr>
+                                                <tr><td>Código de condición</td><td>Entero</td><td>77</td><td>78</td><td>2</td></tr>
+                                                <tr><td>Retención practicada a sujetos suspendidos según:</td><td>Entero</td><td>79</td><td>79</td><td>1</td></tr>
+                                                <tr><td>Importe de la retención</td><td>Decimal</td><td>80</td><td>93</td><td>14</td></tr>
+                                                <tr><td>Porcentaje de exclusión</td><td>Decimal</td><td>94</td><td>99</td><td>6</td></tr>
+                                                <tr><td>Fecha de emisión del boletín</td><td>Fecha</td><td>100</td><td>109</td><td>10</td></tr>
+                                                <tr><td>Tipo de documento del retenido</td><td>Entero</td><td>110</td><td>111</td><td>2</td></tr>
+                                                <tr><td>Número de documento del retenido</td><td>Texto</td><td>112</td><td>131</td><td>20</td></tr>
+                                                <tr><td>Número certificado original</td><td>Entero</td><td>132</td><td>145</td><td>14</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                            </div>
+                        </page>
+                        
+                        <page string="Configuración Avanzada" name="advanced_config" groups="sicore_export.group_sicore_manager">
+                            <div class="alert alert-warning" role="alert">
+                                <strong>⚠️ Advertencia:</strong> Esta sección es solo para usuarios administradores. 
+                                Modifique estos valores solo si entiende el formato SICORE.
+                            </div>
+                            
+                            <!-- Configuración para Retenciones y Percepciones -->
+                            <div invisible="export_type == 'fuel'">
+                                <group string="Parámetros Retenciones/Percepciones" colspan="4">
+                                    <field name="adv_codigo_operacion" />
+                                    <field name="adv_codigo_condicion" />
+                                    <field name="adv_retencion_sujetos_suspendidos" />
+                                    <field name="adv_porcentaje_exclusion" />
+                                    <field name="adv_numero_certificado_original" />
+                                    <field name="adv_fecha_emision_boletin" invisible="export_type != 'perception'" />
+                                </group>
+                            </div>
+                            
+                            <!-- Configuración para Combustibles -->
+                            <div invisible="export_type != 'fuel'">
+                                <group string="Parámetros Combustibles" colspan="4">
+                                    <field name="adv_combustible_codigo_registro" />
+                                    <field name="adv_combustible_codigo_impuesto" />
+                                    <field name="adv_combustible_codigo_regimen" />
+                                    <field name="adv_combustible_codigo_constante" />
+                                </group>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button name="action_generate_export" 
+                            string="Generar Exportación" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="records_count == 0"/>
+                    <button string="Cancelar" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Action para abrir el wizard -->
+    <record id="action_sicore_export_wizard" model="ir.actions.act_window">
+        <field name="name">Exportación SICORE</field>
+        <field name="res_model">sicore.export.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{}</field>
+    </record>
+
+</odoo>

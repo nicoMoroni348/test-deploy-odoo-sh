@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Extensión de vista de Impuesto -->
+    <record id="view_account_tax_form_sicore" model="ir.ui.view">
+        <field name="name">account.tax.form.sicore</field>
+        <field name="model">account.tax</field>
+        <field name="inherit_id" ref="account.view_tax_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="SICORE" name="sicore" groups="sicore_export.group_sicore_manager">
+                    <group>
+                        <group string="Configuración SICORE">
+                            <field name="sicore_tax_code_id" 
+                                   options="{'no_create': True, 'no_open': True}"
+                                   context="{'show_code_and_name': True}"/>
+                            <field name="sicore_regime_code_id" 
+                                   options="{'no_create': True, 'no_open': True}"
+                                   context="{'show_code_and_name': True}"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

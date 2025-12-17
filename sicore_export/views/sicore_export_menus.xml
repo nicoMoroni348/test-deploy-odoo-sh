@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Menú raíz SICORE en Contabilidad/Informes -->
+    <menuitem id="menu_sicore_root"
+              name="SICORE"
+              parent="account.menu_finance_reports"
+              sequence="100"
+              groups="sicore_export.group_sicore_user"/>
+    
+    <!-- Menú Exportación (visible para users y managers) -->
+    <menuitem id="menu_sicore_export"
+              name="Generar Exportación"
+              parent="menu_sicore_root"
+              action="action_sicore_export_wizard"
+              sequence="10"
+              groups="sicore_export.group_sicore_user"/>
+    
+    <!-- Menú Logs (solo managers) -->
+    <menuitem id="menu_sicore_logs"
+              name="Historial de Exportaciones"
+              parent="menu_sicore_root"
+              action="action_sicore_export_log"
+              sequence="20"
+              groups="sicore_export.group_sicore_manager"/>
+    
+    <!-- Menú Catálogos SICORE (solo managers) -->
+    <menuitem id="menu_sicore_catalogs"
+              name="Catálogos SICORE"
+              parent="menu_sicore_root"
+              sequence="100"
+              groups="sicore_export.group_sicore_manager"/>
+    
+    <menuitem id="menu_sicore_tax_codes"
+              name="Códigos de Impuesto"
+              parent="menu_sicore_catalogs"
+              action="action_sicore_tax_codes"
+              sequence="20"/>
+    
+    <menuitem id="menu_sicore_regime_codes"
+              name="Códigos de Régimen"
+              parent="menu_sicore_catalogs"
+              action="action_sicore_regime_codes"
+              sequence="30"/>
+    
+    <menuitem id="menu_sicore_document_types"
+              name="Tipos de Documento"
+              parent="menu_sicore_catalogs"
+              action="action_sicore_document_types"
+              sequence="40"/>
+
+</odoo>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Categoría de módulo -->
+    <record id="module_category_sicore" model="ir.module.category">
+        <field name="name">SICORE</field>
+        <field name="description">Exportación SICORE</field>
+        <field name="sequence">10</field>
+    </record>
+    
+    <!-- Grupo: SICORE User -->
+    <record id="group_sicore_user" model="res.groups">
+        <field name="name">SICORE User</field>
+        <field name="category_id" ref="module_category_sicore"/>
+        <field name="comment">Puede usar el wizard de exportación SICORE</field>
+    </record>
+    
+    <!-- Grupo: SICORE Manager -->
+    <record id="group_sicore_manager" model="res.groups">
+        <field name="name">SICORE Manager</field>
+        <field name="category_id" ref="module_category_sicore"/>
+        <field name="implied_ids" eval="[(4, ref('group_sicore_user'))]"/>
+        <field name="comment">Puede usar el wizard de exportación SICORE y ver logs de exportación</field>
+    </record>
+    
+    <!-- Regla de acceso: Logs solo para managers -->
+    <record id="sicore_log_rule_manager" model="ir.rule">
+        <field name="name">SICORE Log: Solo managers pueden ver logs</field>
+        <field name="model_id" ref="model_sicore_export_log"/>
+        <field name="groups" eval="[(4, ref('group_sicore_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+    </record>
+    
+    <!-- Regla multiempresa para logs -->
+    <record id="sicore_log_company_rule" model="ir.rule">
+        <field name="name">SICORE Log: Multi-company</field>
+        <field name="model_id" ref="model_sicore_export_log"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+    </record>
+
+</odoo>

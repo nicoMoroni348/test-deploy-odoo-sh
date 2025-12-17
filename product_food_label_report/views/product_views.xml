@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- LIST de product.nutrition.line -->
+    <record id="view_product_nutrition_line_list" model="ir.ui.view">
+        <field name="name">product.nutrition.line.list</field>
+        <field name="model">product.nutrition.line</field>
+        <field name="arch" type="xml">
+            <list string="Información nutricional" editable="bottom">
+                <!-- 'Nombre' sin etiqueta visible -->
+                <field name="name" string=""/>
+                <field name="quantity_per_serving" string="Cantidad por porción"/>
+                <field name="vd_percent" string="%VD(*)"/>
+                <field name="sequence" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM de product.nutrition.line -->
+    <record id="view_product_nutrition_line_form" model="ir.ui.view">
+        <field name="name">product.nutrition.line.form</field>
+        <field name="model">product.nutrition.line</field>
+        <field name="arch" type="xml">
+            <form string="Línea nutricional">
+                <group>
+                    <field name="name"/>
+                    <field name="quantity_per_serving"/>
+                    <field name="vd_percent"/>
+                    <field name="sequence"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <!-- Herencia del formulario de producto -->
+    <record id="view_product_form_food_label" model="ir.ui.view">
+        <field name="name">product.template.form.food.label</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <!-- Pestaña ETIQUETA -->
+                <page string="Etiqueta">
+                    <group>
+                        <group>
+                            <field name="label_description"/>
+                            <field name="label_ingredients"/>
+                            <field name="label_tacc_info"/>
+                            <field name="label_storage_mode"/>
+                            <field name="label_manufacturing"/>
+                            <field name="label_address"/>
+                            <field name="label_rne"/>
+                            <field name="label_rnpa"/>
+                        </group>
+                        <group>
+                            <field name="warning_ids" widget="many2many_tags" options="{'no_create': True, 'no_create_edit': True}"/>
+                        </group>
+                    </group>
+                </page>
+
+                <!-- Pestaña INFORMACIÓN NUTRICIONAL -->
+                <page string="Información Nutricional">
+                    <group>
+                        <group>
+                            <field name="serving_size_label" placeholder="Ej: 25.0 g (1 taza de té)"/>
+                        </group>
+                    </group>
+
+                    <!-- Referencia explícita de vistas: list + form
+                         Se quita el context con active_id para evitar el validador. -->
+                    <field name="nutrition_line_ids"
+                           mode="list,form"
+                           views="[(ref('product_food_label_report.view_product_nutrition_line_list'),'list'),
+                                   (ref('product_food_label_report.view_product_nutrition_line_form'),'form')]" />
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Grupo de seguridad: Puede imprimir remito -->
+    <record id="group_print_remito" model="res.groups">
+        <field name="name">Puede imprimir remito</field>
+        <field name="comment">Los usuarios en este grupo pueden ver y ejecutar la acción de impresión del reporte de Remito personalizado.</field>
+        <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
+    </record>
+</odoo>

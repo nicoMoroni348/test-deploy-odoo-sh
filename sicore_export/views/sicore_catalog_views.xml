@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- ========================================= -->
+    <!-- SICORE CATALOG VIEWS                      -->
+    <!-- ========================================= -->
+    
+    <!-- Tax Codes -->
+    <record id="view_sicore_tax_code_list" model="ir.ui.view">
+        <field name="name">sicore.tax.code.list</field>
+        <field name="model">sicore.tax.code</field>
+        <field name="arch" type="xml">
+            <list string="Códigos de Impuesto SICORE">
+                <field name="code"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+    
+    <record id="view_sicore_tax_code_form" model="ir.ui.view">
+        <field name="name">sicore.tax.code.form</field>
+        <field name="model">sicore.tax.code</field>
+        <field name="arch" type="xml">
+            <form string="Código de Impuesto">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Descripción">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record id="action_sicore_tax_codes" model="ir.actions.act_window">
+        <field name="name">Códigos de Impuesto</field>
+        <field name="res_model">sicore.tax.code</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    
+    <!-- Regime Codes -->
+    <record id="view_sicore_regime_code_list" model="ir.ui.view">
+        <field name="name">sicore.regime.code.list</field>
+        <field name="model">sicore.regime.code</field>
+        <field name="arch" type="xml">
+            <list string="Códigos de Régimen SICORE">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="applies_to"/>
+            </list>
+        </field>
+    </record>
+    
+    <record id="view_sicore_regime_code_form" model="ir.ui.view">
+        <field name="name">sicore.regime.code.form</field>
+        <field name="model">sicore.regime.code</field>
+        <field name="arch" type="xml">
+            <form string="Código de Régimen">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <field name="applies_to"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Descripción">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record id="action_sicore_regime_codes" model="ir.actions.act_window">
+        <field name="name">Códigos de Régimen</field>
+        <field name="res_model">sicore.regime.code</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    
+    <!-- Document Types -->
+    <record id="view_sicore_document_type_list" model="ir.ui.view">
+        <field name="name">sicore.document.type.list</field>
+        <field name="model">sicore.document.type</field>
+        <field name="arch" type="xml">
+            <list string="Tipos de Documento SICORE">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="l10n_ar_doc_type_id"/>
+            </list>
+        </field>
+    </record>
+    
+    <record id="view_sicore_document_type_form" model="ir.ui.view">
+        <field name="name">sicore.document.type.form</field>
+        <field name="model">sicore.document.type</field>
+        <field name="arch" type="xml">
+            <form string="Tipo de Documento">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <field name="l10n_ar_doc_type_id"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record id="action_sicore_document_types" model="ir.actions.act_window">
+        <field name="name">Tipos de Documento</field>
+        <field name="res_model">sicore.document.type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

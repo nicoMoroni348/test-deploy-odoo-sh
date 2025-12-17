@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_product_food_label_report" model="ir.actions.report">
+        <field name="name">Rótulo alimenticio</field>
+        <field name="model">mrp.production</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">product_food_label_report.product_food_label_template</field>
+        <field name="binding_model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="product_food_label_report.paperformat_a6_food_label"/>
+        <field name="print_report_name">
+            '[' + (object.lot_producing_id.name or 'sin-lote') + '] ' + (object.product_id.name or 'producto')
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Extensión de vista de Diario -->
+    <record id="view_account_journal_form_sicore" model="ir.ui.view">
+        <field name="name">account.journal.form.sicore</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.view_account_journal_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='bank_account_number']" position="after">
+                <group string="SICORE" name="sicore_settings">
+                    <field name="sicore_export_type"/>
+                    <field name="is_budget_journal" invisible="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

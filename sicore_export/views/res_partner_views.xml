@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Extensión de vista de Partner -->
+    <record id="view_partner_form_sicore" model="ir.ui.view">
+        <field name="name">res.partner.form.sicore</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <page name="sales_purchases" position="after">
+                <page string="SICORE" name="sicore" groups="sicore_export.group_sicore_manager">
+                    <group>
+                        <group string="Configuración General">
+                            <field name="sicore_regime"/>
+                            <field name="is_simplified_regime" invisible="1"/>
+                        </group>
+                        <group string="Información Automática">
+                            <field name="sicore_document_type_id" 
+                                   readonly="1"
+                                   context="{'show_code_and_name': True}"/>
+                        </group>
+                    </group>
+                </page>
+            </page>
+        </field>
+    </record>
+
+</odoo>

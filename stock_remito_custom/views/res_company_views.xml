@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Herencia de la vista de res.company para agregar campos de imágenes del remito -->
+    <record id="view_company_form_remito" model="ir.ui.view">
+        <field name="name">res.company.form.remito</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Remito" name="remito_settings">
+                    <group>
+                        <group string="Imágenes del Remito">
+                            <field name="remito_watermark" widget="image" class="oe_avatar"/>
+                            <field name="remito_footer_image" widget="image" class="oe_avatar"/>
+                            <field name="remito_barcode_image" widget="image" class="oe_avatar"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Información Fiscal - Encabezado">
+                        <group>
+                            <field name="remito_subtitle"/>
+                            <field name="remito_fiscal_type"/>
+                            <field name="remito_cm_number"/>
+                        </group>
+                        <group>
+                            <field name="remito_gross_income"/>
+                            <field name="remito_activity_start"/>
+                            <field name="remito_address"/>
+                            <field name="remito_phone"/>
+                            <field name="remito_email"/>
+                            <field name="remito_letter"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Información Fiscal - Pie del Remito">
+                        <group string="Datos de Imprenta (4 líneas)">
+                            <field name="remito_footer_line1"/>
+                            <field name="remito_footer_line2"/>
+                            <field name="remito_footer_line3"/>
+                            <field name="remito_footer_line4"/>
+                        </group>
+                        <group string="Fecha y Documento de Impresión">
+                            <field name="remito_print_date"/>
+                            <field name="remito_printing_doc_line1"/>
+                            <field name="remito_printing_doc_line2"/>
+                        </group>
+                        <group string="C.A.I. (Código de Autorización)">
+                            <field name="remito_cai"/>
+                            <field name="remito_cai_valid_from"/>
+                            <field name="remito_cai_valid_to"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

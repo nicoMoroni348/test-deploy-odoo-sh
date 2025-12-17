@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    
+    <!-- Tipos de Documento SICORE -->
+    
+    <record id="sicore_doc_80" model="sicore.document.type">
+        <field name="code">80</field>
+        <field name="name">[80] CUIT</field>
+        <field name="l10n_ar_doc_type_id" ref="l10n_ar.it_cuit"/>
+    </record>
+    
+    <record id="sicore_doc_86" model="sicore.document.type">
+        <field name="code">86</field>
+        <field name="name">[86] CUIL</field>
+        <field name="l10n_ar_doc_type_id" ref="l10n_ar.it_CUIL"/>
+    </record>
+
+</odoo>

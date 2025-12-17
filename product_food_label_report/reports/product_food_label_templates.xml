@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="product_food_label_template">
+        <t t-call="web.html_container">
+            <style type="text/css">
+                * { box-sizing: border-box; }
+                body { font-family: "DejaVu Sans", sans-serif; font-size: 9px; color: #000; }
+                .page { display: flex; justify-content: center; align-items: flex-start; min-height: 100%; }
+                .main-table { width: 100%; border-collapse: collapse; border: 2px solid #000; margin: 0 auto; }
+                .main-table td { border-bottom: 1px solid #000; padding: 4px; vertical-align: top; }
+                .main-table tr:last-child td { border-bottom: none; }
+                .company-row { padding: 8px 4px 4px 4px; }
+                .company-content { display: flex; flex-direction: column; align-items: center; text-align: center;}
+                .warnings-top { display: flex; gap: 2px; margin: 0 auto 4px auto; justify-content: center; text-align: center; width: 100%;}
+                .company-name { font-size: 15px; font-weight: 700; text-transform: uppercase; margin: 0; text-align: center; }
+                .warning-img { width: 48px; height: 48px; display: inline-block; margin: 0 1px;}
+                .code-section { text-align: center; font-size: 9px; font-weight: 700; }
+                .product-section { text-align: center; font-size: 9px; font-weight: 700; text-transform: uppercase; line-height: 1.2; word-wrap: break-word; }
+                .col-cell { text-align: center; padding: 4px; }
+                .col-label { font-size: 9px; color: #666; display: block; margin-bottom: 2px; }
+                .col-value { font-size: 9px; font-weight: 700; }    
+                .info-section { padding: 4px; font-size: 9px; }
+                .info-section p { margin: 2px 0; }
+                .nutrition-table { width: 100%; border: 2px solid #000; border-collapse: separate; border-spacing: 0; margin: 4px 0; border-radius: 6px; overflow: hidden; }
+                .nutrition-table th, .nutrition-table td { border: none; padding: 4px; font-size: 8px; }
+                .nutrition-table th { background: none; text-align: center; font-weight: 700; }
+                .nutrition-table td:first-child { text-align: left; }
+                .nutrition-table td:not(:first-child) { text-align: center; }
+                .nutrition-table tr:not(:first-child) { border-top: 1px solid #ccc; }
+                .nutrition-header { background: #f0f0f0; border-radius: 6px 6px 0 0; position: relative; z-index: 1; }
+                .lot-final { text-align: center; font-size: 30px; font-weight: 700; padding: 6px; }
+                .bold { font-weight: 700; }
+                .no-break { page-break-inside: avoid; }
+                .small-note { font-size: 8px; color: #666; margin: 2px 0; }
+            </style>
+
+            <t t-foreach="docs" t-as="mo">
+                <t t-set="p" t-value="mo.product_id"/>
+                <div class="page no-break">
+                    <table class="main-table">
+                        <!-- Fila 1: Octógonos + Nombre empresa -->
+                        <tr>
+                            <td colspan="3" class="company-row">
+                                <div class="company-content">
+                                    <!-- Octógonos arriba a la derecha -->
+                                    <div class="warnings-top">
+                                        <t t-foreach="p.warning_ids" t-as="w">
+                                            <img t-if="w.image"
+                                                 t-attf-src="data:image/png;base64,{{w.image.decode()}}"
+                                                 class="warning-img"
+                                                 alt="Warning"/>
+                                            <div t-if="not w.image" class="warning-img" style="background: #000; color: white; font-size: 8px; display: flex; align-items: center; justify-content: center; text-align: center;">
+                                                <t t-esc="w.name"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                    <!-- Nombre de la empresa centrado debajo -->
+                                    <div class="company-name">
+                                        <t t-esc="p.company_id.name or 'TOSTADERO MANICOP SRL'"/>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- Fila 2: Código + Nombre producto -->
+                        <tr>
+                            <td class="code-section">
+                                <t t-esc="p.default_code or '144'"/>
+                            </td>
+                            <td colspan="2" class="product-section">
+                                <t t-set="product_name" t-value="p._normalize_text(p.name) or 'MANI CROCANTE CON SABOR A QUESO X 1000 G'"/>
+                                <t t-set="words" t-value="product_name.split()"/>
+                                <t t-set="mid_point" t-value="len(words) // 2"/>
+                                <t t-esc="' '.join(words[:mid_point])"/><br/>
+                                <t t-esc="' '.join(words[mid_point:])"/>
+                            </td>
+                        </tr>
+                        
+                        <!-- Fila 3: Nro. Lote | Peso Neto -->
+                        <tr>
+                            <td class="col-cell">
+                                <span class="col-label">Nro. de Lote:</span>
+                                <div class="col-value"><t t-esc="mo.lot_producing_id.name or ''"/></div>
+                            </td>
+                            <td class="col-cell">
+                                <span class="col-label">Peso Neto:</span>
+                                <div class="col-value">
+                                    <t t-if="p.weight" t-esc="'%.0f g' % (p.weight * 1000)"/>
+                                    <t t-else="">-</t>
+                                </div>
+                            </td>
+                            <td class="col-cell" style="border-left: none; width: 0; padding: 0;">
+                                <!-- Celda vacía para mantener estructura de 3 columnas -->
+                            </td>
+                        </tr>
+                        
+                        <!-- Fila 4: Fecha Elaboración | Fecha Vencimiento -->
+                        <tr>
+                            <td class="col-cell">
+                                <span class="col-label">Fecha de Elaboracion:</span>
+                                <div class="col-value"><t t-esc="mo.date_finished_date or ''"/></div>
+                            </td>
+                            <td colspan="2" class="col-cell">
+                                <span class="col-label">Fecha de Vencimiento:</span>
+                                <div class="col-value"><t t-esc="mo.lot_producing_id.expiration_date_date or ''"/></div>
+                            </td>
+                        </tr>
+                        
+                        <!-- Fila 5: Descripción + Info nutricional -->
+                        <tr>
+                            <td colspan="3" class="info-section">
+                                <p t-if="p.label_description"><span class="bold">DESCRIPCION:</span> <t t-esc="p._normalize_text(p.label_description)"/></p>
+                                
+                                <p t-if="p.label_ingredients"><span class="bold">INGREDIENTES:</span> <t t-esc="p._normalize_text(p.label_ingredients)"/></p>
+                                
+                                <p t-if="p.label_tacc_info"><span class="bold"><t t-esc="p._normalize_text(p.label_tacc_info)"/></span></p>
+                                
+                                <p t-if="p.label_storage_mode"><span class="bold">MODO DE CONSERVACION:</span> <t t-esc="p._normalize_text(p.label_storage_mode)"/></p>
+                                
+                                <p t-if="p.label_manufacturing"><span class="bold">FABRICADO POR:</span> <t t-esc="p._normalize_text(p.label_manufacturing)"/></p>
+                                
+                                <p t-if="p.label_rne or p.label_rnpa">
+                                    <span t-if="p.label_rne" class="bold">RNE:</span> <t t-if="p.label_rne" t-esc="p._normalize_text(p.label_rne)"/>
+                                    <span t-if="p.label_rne and p.label_rnpa"> - </span>
+                                    <span t-if="p.label_rnpa" class="bold">RNPA:</span> <t t-if="p.label_rnpa" t-esc="p._normalize_text(p.label_rnpa)"/>
+                                </p>
+                                
+                                <p t-if="p.label_address"><t t-esc="p._normalize_text(p.label_address)"/></p>
+                                
+                                <!-- Tabla nutricional embebida -->
+                                <table class="nutrition-table">
+                                    <tr class="nutrition-header">
+                                        <td colspan="3" class="bold" style="text-align: center;">
+                                            INFORMACION NUTRICIONAL PORCION: <t t-esc="p._normalize_text(p.serving_size_label) or '25.0 g (1 taza de te)'"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th style="background: none; border: none;"></th>
+                                        <th style="background: none;">Cantidad por porcion</th>
+                                        <th style="background: none;">%VD(*)</th>
+                                    </tr>
+                                    <t t-foreach="p.nutrition_line_ids" t-as="nl">
+                                        <tr>
+                                            <td><t t-esc="nl._normalize_text(nl.name) or ''"/></td>
+                                            <td><t t-esc="nl._normalize_text(nl.quantity_per_serving) or ''"/></td>
+                                            <td><t t-esc="nl.vd_percent and ('%.1f' % nl.vd_percent) or ''"/></td>
+                                        </tr>
+                                    </t>
+                                    <!-- Datos de ejemplo si no hay líneas nutricionales -->
+                                    <t t-if="not p.nutrition_line_ids">
+                                        <tr><td>Valor energetico</td><td>130 kcal = 541 kJ</td><td>6</td></tr>
+                                        <tr><td>Carbohidratos</td><td>10 g</td><td>3</td></tr>
+                                        <tr><td>Azucares totales</td><td></td><td>0</td></tr>
+                                        <tr><td>Azucares añadidos</td><td></td><td>0</td></tr>
+                                        <tr><td>Proteinas</td><td>8,5 g</td><td>4</td></tr>
+                                        <tr><td>Grasas totales</td><td>8,5 g</td><td>15</td></tr>
+                                        <tr><td>Grasas saturadas</td><td>0,8 g</td><td>4</td></tr>
+                                        <tr><td>Grasas trans</td><td>0 g</td><td>-</td></tr>
+                                        <tr><td>Fibra alimenticia</td><td>2 g</td><td>8</td></tr>
+                                        <tr><td>Sodio</td><td>153 mg</td><td>6</td></tr>
+                                    </t>
+                                </table>
+                                <p class="small-note" style="text-align: center;">(*) Valores diarios con base a una dieta de 2000 kcal u 8400kJ. Sus valores pueden ser mayores o menores dependiendo de sus necesidades energeticas.</p>
+                            </td>
+                        </tr>
+                        
+                        <!-- Fila 6: Número de lote final -->
+                        <tr>
+                            <td colspan="3" class="lot-final">
+                                <t t-esc="mo.lot_producing_id.name or ''"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
+

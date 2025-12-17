@@ -1,0 +1,17 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sicore_export_log_user,sicore.export.log.user,model_sicore_export_log,group_sicore_user,1,0,0,0
+access_sicore_export_log_manager,sicore.export.log.manager,model_sicore_export_log,group_sicore_manager,1,1,1,1
+access_sicore_export_wizard_user,sicore.export.wizard.user,model_sicore_export_wizard,group_sicore_user,1,1,1,1
+access_sicore_export_wizard_manager,sicore.export.wizard.manager,model_sicore_export_wizard,group_sicore_manager,1,1,1,1
+access_sicore_perception_generator_user,sicore.perception.generator.user,model_sicore_perception_generator,group_sicore_user,1,0,0,0
+access_sicore_perception_generator_manager,sicore.perception.generator.manager,model_sicore_perception_generator,group_sicore_manager,1,0,0,0
+access_sicore_retention_generator_user,sicore.retention.generator.user,model_sicore_retention_generator,group_sicore_user,1,0,0,0
+access_sicore_retention_generator_manager,sicore.retention.generator.manager,model_sicore_retention_generator,group_sicore_manager,1,0,0,0
+access_sicore_fuel_generator_user,sicore.fuel.generator.user,model_sicore_fuel_generator,group_sicore_user,1,0,0,0
+access_sicore_fuel_generator_manager,sicore.fuel.generator.manager,model_sicore_fuel_generator,group_sicore_manager,1,0,0,0
+access_sicore_tax_code_user,sicore.tax.code.user,model_sicore_tax_code,group_sicore_user,1,0,0,0
+access_sicore_tax_code_manager,sicore.tax.code.manager,model_sicore_tax_code,group_sicore_manager,1,1,1,0
+access_sicore_regime_code_user,sicore.regime.code.user,model_sicore_regime_code,group_sicore_user,1,0,0,0
+access_sicore_regime_code_manager,sicore.regime.code.manager,model_sicore_regime_code,group_sicore_manager,1,1,1,0
+access_sicore_document_type_user,sicore.document.type.user,model_sicore_document_type,group_sicore_user,1,0,0,0
+access_sicore_document_type_manager,sicore.document.type.manager,model_sicore_document_type,group_sicore_manager,1,1,1,0

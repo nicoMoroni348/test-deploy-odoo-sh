@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    
+    <!-- Códigos de Impuesto SICORE -->
+    
+    <record id="sicore_tax_217" model="sicore.tax.code">
+        <field name="code">0217</field>
+        <field name="name">[0217] Impuesto a las ganancias</field>
+        <field name="description">Impuesto a las Ganancias - Ley 20.628</field>
+    </record>
+    
+    <record id="sicore_tax_767" model="sicore.tax.code">
+        <field name="code">0767</field>
+        <field name="name">[0767] Ingresos Brutos</field>
+        <field name="description">Percepción Ingresos Brutos bajo Convenio Multilateral - Provincias Argentinas</field>
+    </record>
+
+</odoo>

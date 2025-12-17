@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- ==================== VISTA FORMULARIO - CAMPOS FISCALES ==================== -->
+    <record id="view_picking_form_remito_custom" model="ir.ui.view">
+        <field name="name">stock.picking.form.remito.custom</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='note']" position="after">
+                <page string="Información del Remito" name="remito_info"
+                      invisible="picking_type_code != 'outgoing'">
+                    <group>
+                        <group string="Datos del Remito">
+                            <field name="remito_number"/>
+                        </group>
+                        <group string="Observaciones">
+                            <field name="remito_observations" nolabel="1" 
+                                   placeholder="Ingrese observaciones adicionales para el remito..."/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ==================== VISTA TREE - COLUMNA NÚMERO DE REMITO ==================== -->
+    <record id="view_picking_tree_remito_custom" model="ir.ui.view">
+        <field name="name">stock.picking.tree.remito.custom</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="remito_number" optional="hide" string="Nº Remito"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ==================== ACCIÓN DE SERVIDOR PARA IMPRIMIR ==================== -->
+    <record id="action_server_print_remito" model="ir.actions.server">
+        <field name="name">Imprimir Remito Manicop</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_view_types">form,list</field>
+        <field name="groups_id" eval="[(4, ref('stock_remito_custom.group_print_remito'))]"/>
+        <field name="state">code</field>
+        <field name="code">
+if records:
+    action = records.action_print_custom_remito()
+        </field>
+    </record>
+</odoo>

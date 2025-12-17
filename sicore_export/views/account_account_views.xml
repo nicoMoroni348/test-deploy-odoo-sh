@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Extensión de vista de Cuenta Contable -->
+    <record id="view_account_form_sicore" model="ir.ui.view">
+        <field name="name">account.account.form.sicore</field>
+        <field name="model">account.account</field>
+        <field name="inherit_id" ref="account.view_account_form"/>
+        <field name="arch" type="xml">
+            <field name="allowed_journal_ids" position="after">
+                <separator string="Exportación SICORE" colspan="2"/>
+                <field name="sicore_export_type"/>
+            </field>
+        </field>
+    </record>
+    
+    <!-- Agregar columna en vista list de cuentas -->
+    <record id="view_account_list_sicore" model="ir.ui.view">
+        <field name="name">account.account.list.sicore</field>
+        <field name="model">account.account</field>
+        <field name="inherit_id" ref="account.view_account_list"/>
+        <field name="arch" type="xml">
+            <field name="code" position="after">
+                <field name="sicore_export_type" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

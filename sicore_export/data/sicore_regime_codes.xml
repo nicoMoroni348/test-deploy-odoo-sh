@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    
+    <!-- Códigos de Régimen SICORE -->
+    
+    <record id="sicore_regime_027" model="sicore.regime.code">
+        <field name="code">027</field>
+        <field name="name">[027] Alquiler de bienes muebles e inmuebles</field>
+        <field name="applies_to">retention</field>
+    </record>
+    
+    <record id="sicore_regime_035" model="sicore.regime.code">
+        <field name="code">035</field>
+        <field name="name">[035] Regalías</field>
+        <field name="applies_to">retention</field>
+    </record>
+    
+    <record id="sicore_regime_046" model="sicore.regime.code">
+        <field name="code">046</field>
+        <field name="name">[046] Dividendos</field>
+        <field name="applies_to">retention</field>
+    </record>
+    
+    <record id="sicore_regime_078" model="sicore.regime.code">
+        <field name="code">078</field>
+        <field name="name">[078] Enajenación de Bienes muebles y bienes de cambio</field>
+        <field name="applies_to">both</field>
+    </record>
+    
+    <record id="sicore_regime_094" model="sicore.regime.code">
+        <field name="code">094</field>
+        <field name="name">[094] Locación de Obras o Servicios</field>
+        <field name="applies_to">retention</field>
+    </record>
+    
+    <record id="sicore_regime_099" model="sicore.regime.code">
+        <field name="code">099</field>
+        <field name="name">[099] Factura M</field>
+        <field name="applies_to">both</field>
+    </record>
+    
+    <record id="sicore_regime_116" model="sicore.regime.code">
+        <field name="code">116</field>
+        <field name="name">[116] Honorarios directores/Profesiones liberales/Sindico</field>
+        <field name="applies_to">retention</field>
+    </record>
+    
+    <record id="sicore_regime_160" model="sicore.regime.code">
+        <field name="code">160</field>
+        <field name="name">[160] Rentas del trabajo bajo Relación de dependencia</field>
+        <field name="applies_to">retention</field>
+    </record>
+    
+    <record id="sicore_regime_691" model="sicore.regime.code">
+        <field name="code">691</field>
+        <field name="name">[691] Vales de almuerzo o canasta familiar</field>
+        <field name="applies_to">retention</field>
+    </record>
+    
+    <record id="sicore_regime_775" model="sicore.regime.code">
+        <field name="code">775</field>
+        <field name="name">[775] Retenciones a monotributistas</field>
+        <field name="applies_to">retention</field>
+    </record>
+    
+    <record id="sicore_regime_602" model="sicore.regime.code">
+        <field name="code">602</field>
+        <field name="name">[602] Percepciones IIBB</field>
+        <field name="applies_to">perception</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Herencia de la vista de res.partner para agregar campos de cliente del remito -->
+    <record id="view_partner_form_remito" model="ir.ui.view">
+        <field name="name">res.partner.form.remito</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <!-- Agregar Número de Cliente debajo de category_id -->
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="customer_number"/>
+            </xpath>
+            
+            <!-- Agregar Condición de Venta debajo de property_product_pricelist -->
+            <xpath expr="//field[@name='property_product_pricelist']" position="after">
+                <field name="sale_condition"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
