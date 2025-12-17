@@ -38,12 +38,11 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <!-- Botón para descargar archivo -->
-                        <button name="%(base.action_attachment)d" 
-                                type="action" 
+                        <button name="action_download_file" 
+                                type="object" 
                                 class="oe_stat_button" 
                                 icon="fa-download"
-                                invisible="file_content == False"
-                                context="{'default_res_model': 'sicore.export.log', 'default_res_id': id}">
+                                invisible="file_content == False">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_text">Descargar</span>
                                 <span class="o_stat_text">Archivo</span>

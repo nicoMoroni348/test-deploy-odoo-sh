@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api  # type: ignore
+from odoo.tools import DEFAULT_SERVER_DATE_FORMAT  # type: ignore
 
 
 class SicoreExportLog(models.Model):
@@ -134,3 +135,12 @@ class SicoreExportLog(models.Model):
                 record.file_name = f"sicore_{export_type_name}_{date_str}.txt"
             else:
                 record.file_name = 'sicore_export.txt'
+
+    def action_download_file(self):
+        """Acción para descargar el archivo exportado"""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/sicore.export.log/{self.id}/file_content/{self.file_name}?download=true',
+            'target': 'self',
+        }

@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import re
+import logging
 from odoo import models, _  # type: ignore
 from odoo.exceptions import ValidationError  # type: ignore
+
+_logger = logging.getLogger(__name__)
 
 
 class PerceptionGenerator(models.Model):
@@ -268,14 +271,11 @@ class PerceptionGenerator(models.Model):
         importe_percepcion = abs(move_line.balance)
         
         # Obtener importe del comprobante y base de cálculo
-        # Para cobros con percepción, necesitamos buscar la factura original
+        # Para cobros con percepción, necesitamos buscar el pago asociado
         importe_comprobante, base_calculo, factura_relacionada = self._get_invoice_amounts(move_line, move)
         
-        # Obtener código de comprobante desde la FACTURA (no del asiento de cobro)
-        # Si hay factura relacionada, usar su tipo de documento
-        # Sino, usar el tipo del asiento actual
-        move_for_comprobante = factura_relacionada if factura_relacionada else move
-        codigo_comprobante = self._get_codigo_comprobante(move_for_comprobante)
+        # Obtener código de comprobante (fijo en 01 para percepciones, configurable en wizard)
+        codigo_comprobante = self._get_codigo_comprobante(move, wizard)
         
         # Limpiar número de comprobante (de la factura si existe, sino del asiento)
         numero_comp = re.sub(r'[^0-9]', '', (factura_relacionada.name if factura_relacionada else move.name) or '')
@@ -290,7 +290,7 @@ class PerceptionGenerator(models.Model):
         
         result = {
             'codigo_comprobante': codigo_comprobante,
-            'fecha_emision_comprobante': factura_relacionada.invoice_date if factura_relacionada else (move.invoice_date or move.date),
+            'fecha_emision_comprobante': move_line.date,
             'numero_comprobante': numero_comp,
             'importe_comprobante': importe_comprobante,
             'codigo_impuesto': codigo_impuesto,
@@ -374,26 +374,19 @@ class PerceptionGenerator(models.Model):
             vat = re.sub(r'[^0-9]', '', str(vat))
         return vat.zfill(11)  # Rellenar con ceros a la izquierda si es necesario
 
-    def _get_codigo_comprobante(self, move):
+    def _get_codigo_comprobante(self, move, wizard=None):
         """
-        Detecta el código de comprobante desde l10n_latam.document_type
-        Si el move tiene l10n_latam_document_type_id, usa ese código.
-        Sino, mapea según move_type.
+        Retorna el código de comprobante para exportación SICORE.
+        
+        Para percepciones, el código es fijo en '01' (Factura).
+        Puede ser sobreescrito desde la configuración avanzada del wizard.
         """
-        # Si el asiento tiene tipo de documento de localización argentina, usarlo
-        if move.l10n_latam_document_type_id and move.l10n_latam_document_type_id.code:
-            return move.l10n_latam_document_type_id.code
+        # Si hay wizard y está configurado el código de comprobante avanzado, usar ese
+        if wizard and hasattr(wizard, 'adv_codigo_comprobante') and wizard.adv_codigo_comprobante:
+            return wizard.adv_codigo_comprobante
         
-        # Fallback: mapeo básico por move_type
-        code_map = {
-            'out_invoice': '01',  # Factura
-            'in_invoice': '01',   # Factura
-            'out_refund': '03',   # Nota de Crédito
-            'in_refund': '03',    # Nota de Crédito
-            'entry': '06',        # Recibo/Orden de Pago
-        }
-        
-        return code_map.get(move.move_type, '06')
+        # Default para percepciones: '01'
+        return '01'
 
     def _get_tax_and_regime_codes(self, move_line):
         """
@@ -466,54 +459,21 @@ class PerceptionGenerator(models.Model):
 
     def _get_invoice_amounts(self, move_line, payment_move):
         """
-        Obtiene el importe del comprobante y base de cálculo buscando la factura relacionada.
+        Obtiene el importe del comprobante y base de cálculo directamente del asiento contable.
         
-        Para cobros con percepción (clientes):
-        1. Busca la factura que se está cobrando (a través de reconciliación)
-        2. Retorna el importe total de la factura y su base imponible
+        IMPORTANTE: Para percepciones, los datos se extraen directamente del account.move:
+        - Importe del comprobante: move.amount_total
+        - Base de cálculo: move.amount_untaxed
         
         Returns:
-            tuple: (importe_comprobante, base_calculo, factura)
+            tuple: (importe_comprobante, base_calculo, factura_relacionada o None)
         """
+        move = move_line.move_id
         
-        # Buscar factura relacionada a través de la reconciliación de las líneas
-        # Las líneas de cliente del cobro están reconciliadas con la factura
-        invoice = None
+        # Extraer importes directamente del asiento contable
+        importe_comprobante = abs(move.amount_total)
+        base_calculo = abs(move.amount_untaxed)
         
-        # Buscar líneas del asiento que sean de tipo receivable (clientes)
-        receivable_lines = payment_move.line_ids.filtered(
-            lambda l: l.account_id.account_type == 'asset_receivable'
-        )
+        # Retornar None para factura_relacionada (no la usamos en percepciones)
+        return importe_comprobante, base_calculo, None
         
-        for line in receivable_lines:
-            # Buscar la reconciliación (matched_debit_ids o matched_credit_ids)
-            if line.matched_debit_ids:
-                for match in line.matched_debit_ids:
-                    if match.debit_move_id.move_id.move_type in ['out_invoice', 'out_refund']:
-                        invoice = match.debit_move_id.move_id
-                        break
-            
-            if not invoice and line.matched_credit_ids:
-                for match in line.matched_credit_ids:
-                    if match.credit_move_id.move_id.move_type in ['out_invoice', 'out_refund']:
-                        invoice = match.credit_move_id.move_id
-                        break
-            
-            if invoice:
-                break
-        
-        if invoice:            
-            # Importe del comprobante = total de la factura
-            importe_comprobante = abs(invoice.amount_total)
-            base_calculo = abs(invoice.amount_untaxed)
-            
-            return importe_comprobante, base_calculo, invoice
-        else:            
-            # Fallback: usar datos del asiento de cobro
-            importe_comprobante = abs(payment_move.amount_total)
-            
-            # Buscar líneas receivable y sumar sus balances
-            receivable_total = sum(abs(line.balance) for line in receivable_lines)
-            base_calculo = receivable_total if receivable_total > 0 else importe_comprobante
-            
-            return importe_comprobante, base_calculo, None

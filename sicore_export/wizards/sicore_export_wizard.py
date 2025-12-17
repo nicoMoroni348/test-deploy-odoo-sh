@@ -99,6 +99,12 @@ class SicoreExportWizard(models.TransientModel):
         help='Valor usado en campo de código de operación (por defecto: 1)'
     )
     
+    adv_codigo_comprobante = fields.Char(
+        string='Código de Comprobante',
+        default='06',
+        help='Código de comprobante (por defecto: 06 para retenciones, 01 para percepciones). Solo cambiar si es necesario.'
+    )
+    
     adv_codigo_condicion = fields.Char(
         string='Código de Condición',
         default='01',
@@ -160,6 +166,14 @@ class SicoreExportWizard(models.TransientModel):
     # ============================================================
     # ONCHANGES
     # ============================================================
+    
+    @api.onchange('export_type')
+    def _onchange_export_type(self):
+        """Actualizar código de comprobante según tipo de exportación"""
+        if self.export_type == 'perception':
+            self.adv_codigo_comprobante = '01'
+        elif self.export_type == 'retention':
+            self.adv_codigo_comprobante = '06'
     
     @api.onchange('company_id')
     def _onchange_company(self):

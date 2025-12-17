@@ -152,6 +152,7 @@
                             <!-- Configuración para Retenciones y Percepciones -->
                             <div invisible="export_type == 'fuel'">
                                 <group string="Parámetros Retenciones/Percepciones" colspan="4">
+                                    <field name="adv_codigo_comprobante" />
                                     <field name="adv_codigo_operacion" />
                                     <field name="adv_codigo_condicion" />
                                     <field name="adv_retencion_sujetos_suspendidos" />

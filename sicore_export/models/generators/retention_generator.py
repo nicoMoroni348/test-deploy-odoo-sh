@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import re
+import logging
 from odoo import models, _  # type: ignore
 from odoo.exceptions import ValidationError  # type: ignore
+
+_logger = logging.getLogger(__name__)
 
 
 class RetentionGenerator(models.Model):
@@ -283,18 +286,13 @@ class RetentionGenerator(models.Model):
         # Importe de retención = valor absoluto del balance del apunte
         importe_retencion = abs(move_line.balance)
         
-        # Obtener importe del comprobante y base de cálculo
-        # Para pagos con retención, necesitamos buscar la factura original
+        # Obtener importe del comprobante y base de cálculo desde payment + withholdings
         importe_comprobante, base_calculo, factura_relacionada = self._get_invoice_amounts(move_line, move)
         
-        # Obtener código de comprobante desde la FACTURA (no del asiento de pago)
-        # Si hay factura relacionada, usar su tipo de documento
-        # Sino, usar el tipo del asiento actual
-        move_for_comprobante = factura_relacionada if factura_relacionada else move
-        codigo_comprobante = self._get_codigo_comprobante(move_for_comprobante)
+        # Obtener código de comprobante (fijo en 06 para retenciones, configurable en wizard)
+        codigo_comprobante = self._get_codigo_comprobante(move, wizard)
         
-        # Limpiar número de comprobante (de la factura si existe, sino del asiento)
-        numero_comp = re.sub(r'[^0-9]', '', (factura_relacionada.name if factura_relacionada else move.name) or '')
+        # Número de comprobante del apunte contable
         
         # Usar valores del wizard si están disponibles, sino usar defaults
         codigo_operacion = wizard.adv_codigo_operacion if wizard else '1'
@@ -308,8 +306,8 @@ class RetentionGenerator(models.Model):
         
         return {
             'codigo_comprobante': codigo_comprobante,
-            'fecha_emision_comprobante': factura_relacionada.invoice_date if factura_relacionada else (move.invoice_date or move.date),
-            'numero_comprobante': numero_comp,
+            'fecha_emision_comprobante': move_line.date,
+            'numero_comprobante': move_line.name,
             'importe_comprobante': importe_comprobante,
             'codigo_impuesto': codigo_impuesto,
             'codigo_regimen': codigo_regimen,
@@ -378,6 +376,14 @@ class RetentionGenerator(models.Model):
                 (move_line.move_id.name,)
             )
         
+        # Validar que el asiento contable tenga withholdings (retenciones)
+        if not move_line.move_id.l10n_ar_withholding_ids:
+            errors.append(
+                _("RETENCIONES NO ENCONTRADAS: El asiento contable '%s' no tiene retenciones (l10n_ar_withholding_ids) asociadas. "
+                  "Los apuntes de retención DEBEN estar vinculados a un asiento que contiene los datos de retención.") %
+                (move_line.move_id.name,)
+            )
+        
         if errors:
             raise ValidationError(" | ".join(errors))
 
@@ -388,26 +394,19 @@ class RetentionGenerator(models.Model):
             vat = re.sub(r'[^0-9]', '', str(vat))
         return vat.zfill(11)  # Rellenar con ceros a la izquierda si es necesario
 
-    def _get_codigo_comprobante(self, move):
+    def _get_codigo_comprobante(self, move, wizard=None):
         """
-        Detecta el código de comprobante desde l10n_latam.document_type
-        Si el move tiene l10n_latam_document_type_id, usa ese código.
-        Sino, mapea según move_type.
+        Retorna el código de comprobante para exportación SICORE.
+        
+        Para retenciones, el código es fijo en '06' (Recibo/Orden de Pago).
+        Puede ser sobreescrito desde la configuración avanzada del wizard.
         """
-        # Si el asiento tiene tipo de documento de localización argentina, usarlo
-        if move.l10n_latam_document_type_id and move.l10n_latam_document_type_id.code:
-            return move.l10n_latam_document_type_id.code
+        # Si hay wizard y está configurado el código de comprobante avanzado, usar ese
+        if wizard and hasattr(wizard, 'adv_codigo_comprobante') and wizard.adv_codigo_comprobante:
+            return wizard.adv_codigo_comprobante
         
-        # Fallback: mapeo básico por move_type
-        code_map = {
-            'out_invoice': '01',  # Factura
-            'in_invoice': '01',   # Factura
-            'out_refund': '03',   # Nota de Crédito
-            'in_refund': '03',    # Nota de Crédito
-            'entry': '06',        # Recibo/Orden de Pago
-        }
-        
-        return code_map.get(move.move_type, '06')
+        # Default para retenciones: '06'
+        return '06'
 
     def _get_tax_and_regime_codes(self, move_line):
         """
@@ -480,6 +479,30 @@ class RetentionGenerator(models.Model):
             )
         return partner.sicore_document_type_id.code
 
+
+
+    def _get_move_withholding_amounts(self, move, payment):
+        """
+        Extrae importes desde el payment y los withholdings del asiento contable.
+        
+        - Importe del comprobante: payment.amount
+        - Base de cálculo: suma de tax_base_amount de todos los withholdings
+        
+        Args:
+            move: account.move record
+            payment: account.payment record asociado
+            
+        Returns:
+            tuple: (importe_comprobante, base_calculo)
+        """
+        # Importe del comprobante = monto total del pago
+        importe_comprobante = abs(payment.amount)
+        
+        # Base de cálculo = suma de tax_base_amount de todos los withholdings
+        base_calculo = sum(abs(w.tax_base_amount) for w in move.l10n_ar_withholding_ids)
+        
+        return importe_comprobante, base_calculo
+
     def _get_base_calculo(self, move):
         """
         Calcula la base imponible sumando las líneas de cuentas por pagar/cobrar
@@ -498,54 +521,39 @@ class RetentionGenerator(models.Model):
 
     def _get_invoice_amounts(self, move_line, payment_move):
         """
-        Obtiene el importe del comprobante y base de cálculo buscando la factura relacionada.
+        Obtiene el importe del comprobante y base de cálculo desde el pago y los withholdings.
         
-        Para pagos con retención:
-        1. Busca la factura que se está pagando (a través de reconciliación)
-        2. Retorna el importe total de la factura y su base imponible
+        IMPORTANTE: El importe del comprobante se extrae del account.payment (payment.amount),
+        mientras que la base de cálculo se extrae de los withholdings del asiento contable.
+        
+        Estrategia:
+        1. Buscar el payment asociado al move_id (a través de move_id.payment_id)
+        2. Si no encuentra, intentar con move_id.origin_payment_id
+        3. Si encuentr: extraer amount del payment y tax_base_amount de withholdings
+        4. Si NO encuentra en ambos: lanzar error de validación
         
         Returns:
-            tuple: (importe_comprobante, base_calculo, factura)
+            tuple: (importe_comprobante, base_calculo, factura_relacionada o None)
         """
+        move = move_line.move_id
         
-        # Buscar factura relacionada a través de la reconciliación de las líneas
-        # Las líneas de proveedor/cliente del pago están reconciliadas con la factura
-        invoice = None
+        # Buscar payment asociado al asiento contable
+        payment = None
+        if hasattr(move, 'payment_id') and move.payment_id:
+            payment = move.payment_id
+        elif hasattr(move, 'origin_payment_id') and move.origin_payment_id:
+            payment = move.origin_payment_id
         
-        # Buscar líneas del asiento que sean de tipo payable/receivable
-        payable_lines = payment_move.line_ids.filtered(
-            lambda l: l.account_id.account_type in ['liability_payable', 'asset_receivable']
-        )
+        if not payment:
+            # Error: el asiento contable DEBE tener un payment asociado
+            raise ValidationError(
+                _("PAGO NO ENCONTRADO: El asiento contable '%s' no tiene un pago (account.payment) asociado. "
+                  "Los apuntes de retención DEBEN estar vinculados a un pago.") %
+                (move.name,)
+            )
         
-        for line in payable_lines:
-            # Buscar la reconciliación (matched_debit_ids o matched_credit_ids)
-            if line.matched_debit_ids:
-                for match in line.matched_debit_ids:
-                    if match.debit_move_id.move_id.move_type in ['in_invoice', 'in_refund', 'out_invoice', 'out_refund']:
-                        invoice = match.debit_move_id.move_id
-                        break
-            
-            if not invoice and line.matched_credit_ids:
-                for match in line.matched_credit_ids:
-                    if match.credit_move_id.move_id.move_type in ['in_invoice', 'in_refund', 'out_invoice', 'out_refund']:
-                        invoice = match.credit_move_id.move_id
-                        break
-            
-            if invoice:
-                break
+        # Extraer importes del payment + withholdings
+        importe_comprobante, base_calculo = self._get_move_withholding_amounts(move, payment)
         
-        if invoice:
-            # Importe del comprobante = total de la factura
-            importe_comprobante = abs(invoice.amount_total)
-            
-            # Base de cálculo = subtotal sin impuestos (base imponible)
-            # En Argentina, las retenciones se calculan sobre el subtotal sin IVA
-            base_calculo = abs(invoice.amount_untaxed)
-            
-            return importe_comprobante, base_calculo, invoice
-        else:            
-            # Fallback: usar datos del asiento de pago
-            importe_comprobante = abs(payment_move.amount_total)
-            base_calculo = self._get_base_calculo(payment_move)
-            
-            return importe_comprobante, base_calculo, None
+        # Retornar None para factura_relacionada (no la usamos en retenciones)
+        return importe_comprobante, base_calculo, None
